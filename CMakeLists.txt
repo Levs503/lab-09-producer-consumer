@@ -28,11 +28,19 @@ string(APPEND CMAKE_CXX_FLAGS " -Wshadow -Wnon-virtual-dtor")
 
 hunter_add_package(GTest)
 find_package(GTest CONFIG REQUIRED)
+hunter_add_package(gumbo)
+find_package(gumbo CONFIG REQUIRED)
+hunter_add_package(asio)
+find_package(asio CONFIG REQUIRED)
+hunter_add_package(Beast)
+find_package(Beast CONFIG REQUIRED)
+hunter_add_package(Boost COMPONENTS program_options)
+find_package(Boost CONFIG REQUIRED program_options)
 
 add_library(${PROJECT_NAME} STATIC
   # enum your files and delete this comment
   ${CMAKE_CURRENT_SOURCE_DIR}/sources/source.cpp
-)
+        sources/my_crawler.cpp include/my_crawler.h sources/web_page_parser.cpp include/web_page_parser.h)
 
 add_executable(demo
   ${CMAKE_CURRENT_SOURCE_DIR}/demo/main.cpp
@@ -43,7 +51,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   "$<INSTALL_INTERFACE:include>"
 )
 
-target_link_libraries(demo ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} gumbo::gumbo asio::asio_headeronly Beast::Beast)
+
+target_link_libraries(demo ${PROJECT_NAME} Boost::program_options asio::asio_static)
 
 if(BUILD_TESTS)
   add_executable(tests
