@@ -103,14 +103,10 @@ Parsing_result parse_page(const http::response<http::string_body>& page,
   GumboOutput* parsed_page(gumbo_parse(page.body().c_str()));
   Parsing_result ret;
   if (need_parse_child) {
-    ret =  {
-        find_teg_attribute(parsed_page->root, GUMBO_TAG_IMG, "src"),
-        find_teg_attribute(parsed_page->root, GUMBO_TAG_A, "href")};
-  }
-  else
-  ret = {
-      find_teg_attribute(parsed_page->root, GUMBO_TAG_IMG, "src"), {}};
-
+    ret = {find_teg_attribute(parsed_page->root, GUMBO_TAG_IMG, "src"),
+           find_teg_attribute(parsed_page->root, GUMBO_TAG_A, "href")};
+  } else
+    ret = {find_teg_attribute(parsed_page->root, GUMBO_TAG_IMG, "src"), {}};
 
   if (parsed_page) gumbo_destroy_output(&kGumboDefaultOptions, parsed_page);
   return ret;

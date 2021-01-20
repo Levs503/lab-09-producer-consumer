@@ -2,6 +2,7 @@
 // Created by levs503 on 20.01.2021.
 //
 #include <my_crawler.h>
+
 #include <boost/program_options.hpp>
 #include <cstddef>
 #include <iostream>
@@ -28,15 +29,13 @@ program_options::variables_map parse_program_options(
     int const arguments_count, const char* const arguments[]) {
   program_options::variables_map variables;
   program_options::store(
-      program_options::parse_command_line(arguments_count, arguments,
-                                          create_program_options_description_()),
+      program_options::parse_command_line(
+          arguments_count, arguments, create_program_options_description_()),
       variables);
   variables.notify();
 
   return variables;
 }
-
-
 
 int main(int const arguments_count, char const* const arguments[]) {
   auto const program_options =
@@ -72,5 +71,3 @@ int main(int const arguments_count, char const* const arguments[]) {
 
   my_crawler::from(url, depth, network_threads, parser_threads, output).join();
 }
-
-
