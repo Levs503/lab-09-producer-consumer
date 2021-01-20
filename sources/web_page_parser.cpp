@@ -47,7 +47,7 @@ std::pair<std::string, std::string> parse_url(const std::string& url) {
   } else {
     first_host_char = 0;  // url without protocol
   }
-  size_t path_delim = url.find('/');
+  size_t path_delim = url.find('/', first_host_char);
   if (path_delim == std::string::npos)
     return std::make_pair(url.substr(first_host_char), "/");
   return std::make_pair(
@@ -77,8 +77,9 @@ http::response<http::string_body> download_url_page(std::string& host,
   }
 }
 
-std::set<std::string> find_teg_attribute(GumboNode* node, GumboTag tag,
+std::set<std::string> find_teg_attribute(GumboNode* node, GumboTag const tag,
                                          std::string attribute) {
+  if (node->type != GUMBO_NODE_ELEMENT) return {};
   std::set<std::string> references;
   if (node->v.element.tag == tag) {
     auto href_tag =
@@ -100,12 +101,17 @@ std::set<std::string> find_teg_attribute(GumboNode* node, GumboTag tag,
 Parsing_result parse_page(const http::response<http::string_body>& page,
                           bool need_parse_child) {
   GumboOutput* parsed_page(gumbo_parse(page.body().c_str()));
-  if (need_parse_child)
-    Parsing_result ret{
+  Parsing_result ret;
+  if (need_parse_child) {
+    ret =  {
         find_teg_attribute(parsed_page->root, GUMBO_TAG_IMG, "src"),
         find_teg_attribute(parsed_page->root, GUMBO_TAG_A, "href")};
-  Parsing_result ret{
+  }
+  else
+  ret = {
       find_teg_attribute(parsed_page->root, GUMBO_TAG_IMG, "src"), {}};
+
+
   if (parsed_page) gumbo_destroy_output(&kGumboDefaultOptions, parsed_page);
   return ret;
 }
