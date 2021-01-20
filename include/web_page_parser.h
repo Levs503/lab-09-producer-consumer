@@ -12,19 +12,20 @@
 #include <set>
 #include <utility>
 
-struct Parsing_result{
+struct Parsing_result {
   std::set<std::string> image_urls;
   std::set<std::string> child_urls;
 };
 
 std::ostream& operator<<(std::ostream& out, Parsing_result& res);
 
-std::pair<std::string, std::string> parse_url(std::string& url);
+std::pair<std::string, std::string> parse_url(const std::string& url);
 
 boost::beast::http::response<boost::beast::http::string_body> download_url_page(
-    std::string& host, std::string& target, std::string& port);
+    std::string& host, std::string& target, std::string port);
 
-Parsing_result Parse_page(boost::beast::http::response<boost::beast::http::string_body>& page);
-
+Parsing_result parse_page(
+    const boost::beast::http::response<boost::beast::http::string_body>& page,
+    bool need_parse_child);
 
 #endif  // TEMPLATE_WEB_PAGE_PARSER_H

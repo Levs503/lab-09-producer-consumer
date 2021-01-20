@@ -40,10 +40,10 @@ find_package(Boost CONFIG REQUIRED program_options)
 add_library(${PROJECT_NAME} STATIC
   # enum your files and delete this comment
   ${CMAKE_CURRENT_SOURCE_DIR}/sources/source.cpp
-        sources/my_crawler.cpp include/my_crawler.h sources/web_page_parser.cpp include/web_page_parser.h)
+        sources/my_crawler.cpp  sources/web_page_parser.cpp)
 
 add_executable(demo
-  ${CMAKE_CURRENT_SOURCE_DIR}/demo/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/sources/main.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

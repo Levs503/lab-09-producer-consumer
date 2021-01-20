@@ -38,7 +38,7 @@ std::ostream& operator<<(std::ostream& out, Parsing_result& res) {
   return out << "}}";
 }
 
-std::pair<std::string, std::string> parse_url(std::string& url) {
+std::pair<std::string, std::string> parse_url(const std::string& url) {
   size_t first_host_char;
   size_t protocol_delim = url.find("://");
   if (protocol_delim != std::string::npos) {
@@ -54,8 +54,9 @@ std::pair<std::string, std::string> parse_url(std::string& url) {
       url.substr(first_host_char, path_delim - first_host_char),
       url.substr(path_delim));
 }
-http::response<http::string_body> download_url_page(
-    std::string& host, std::string& target, std::string& port){
+http::response<http::string_body> download_url_page(std::string& host,
+                                                    std::string& target,
+                                                    std::string port) {
   try {
     asio::io_context service;
     beast::tcp_stream stream(service);
@@ -71,36 +72,40 @@ http::response<http::string_body> download_url_page(
     http::response<http::string_body> response;
     http::read(stream, buffer, response);
     return response;
-  }catch (...){
+  } catch (...) {
     return {};
   }
-
 }
 
-std::set<std::string> find_teg_attribute(GumboNode* node, GumboTag tag, std::string attribute){
+std::set<std::string> find_teg_attribute(GumboNode* node, GumboTag tag,
+                                         std::string attribute) {
   std::set<std::string> references;
-  if(node->v.element.tag == tag){
-    auto href_tag = gumbo_get_attribute(&node->v.element.attributes, attribute.data());
-    if(href_tag) references.emplace(href_tag->value);
+  if (node->v.element.tag == tag) {
+    auto href_tag =
+        gumbo_get_attribute(&node->v.element.attributes, attribute.data());
+    if (href_tag) references.emplace(href_tag->value);
   }
 
   auto children = &node->v.element.children;
   auto length = children->length;
-  for(size_t k =0; k< length; k++){
-    auto child_ref = find_teg_attribute(static_cast<GumboNode*>(children->data[k]), tag, attribute);
+  for (size_t k = 0; k < length; k++) {
+    auto child_ref = find_teg_attribute(
+        static_cast<GumboNode*>(children->data[k]), tag, attribute);
     references.insert(child_ref.begin(), child_ref.end());
   }
 
   return references;
 }
 
-Parsing_result Parse_page(http::response<http::string_body>& page, bool need_parse_child){
+Parsing_result parse_page(const http::response<http::string_body>& page,
+                          bool need_parse_child) {
   GumboOutput* parsed_page(gumbo_parse(page.body().c_str()));
-  if(need_parse_child)
-    Parsing_result ret{find_teg_attribute(parsed_page->root, GUMBO_TAG_IMG, "src"),
-                     find_teg_attribute(parsed_page->root, GUMBO_TAG_A, "href")};
-  Parsing_result ret{find_teg_attribute(parsed_page->root, GUMBO_TAG_IMG, "src"),
-      {}};
+  if (need_parse_child)
+    Parsing_result ret{
+        find_teg_attribute(parsed_page->root, GUMBO_TAG_IMG, "src"),
+        find_teg_attribute(parsed_page->root, GUMBO_TAG_A, "href")};
+  Parsing_result ret{
+      find_teg_attribute(parsed_page->root, GUMBO_TAG_IMG, "src"), {}};
   if (parsed_page) gumbo_destroy_output(&kGumboDefaultOptions, parsed_page);
   return ret;
 }
